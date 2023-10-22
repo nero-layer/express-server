@@ -19,6 +19,8 @@
     "express-rate-limit": "^7.1.1",
     "hbs": "^4.2.0",
     "nodemailer": "^6.9.6",
+    "nostr": "^0.2.8",
+    "nostr-tools": "^1.17.0",
     "sinon": "^17.0.0"
   },
   "devDependencies": {
