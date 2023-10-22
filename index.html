@@ -89,6 +89,7 @@
         alert('captcha is required');
         return;
       }
+      console.log("It's doing something")
       fetch('/request_eth', {
         method: 'POST',
         headers: {
@@ -100,6 +101,10 @@
           request_eth_address: requestEthAddress,
         }),
       })
+        .then(res => {
+          console.log("We got a response")
+          console.log(res)
+        })
         .catch(err => {
           window.alert(err);
         });

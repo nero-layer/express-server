@@ -82,7 +82,7 @@ export async function validate_faucet_request(db_cursor, request_obj){
         faucet_requests_t 
         (request_eth_address, email, user_validation_token)
         VALUES (?, ?, ?);`);
-    await insertStmt.run(request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token);
+    await insertStmt.run(request_obj.request_eth_address, request_obj.email, user_validation_token);
     // await db_cursor.exec(`
     //     INSERT INTO 
     //         faucet_requests_t 
@@ -208,11 +208,11 @@ export async function create_faucet_transaction(db_cursor, request_obj){
             `)
             let faucet_requests_t = await faucet_requests_t_statement.run(request_obj.request_eth_address.request_eth_address);
 
-            let insert_transactions_in_progress_t = await db_cursor.prepare(`
-                INSERT INTO transactions_in_progress_t (faucet_request_id, hot_wallet_address, to_wallet_address, tx_hash, gas_price)
-                VALUES (?, ?, ?, ?, ?);
-            `)
-            insert_transactions_in_progress_t.run(faucet_request_id, hot_wallet_address, to_wallet_address, txResponse.hash, tx.gasPrice);
+            // let insert_transactions_in_progress_t = await db_cursor.prepare(`
+            //     INSERT INTO transactions_in_progress_t (faucet_request_id, hot_wallet_address, to_wallet_address, tx_hash, gas_price)
+            //     VALUES (?, ?, ?, ?, ?);
+            // `)
+            // insert_transactions_in_progress_t.run(faucet_request_id, hot_wallet_address, to_wallet_address, txResponse.hash, tx.gasPrice);
 
             // Todo: Need txResponse.hash to be returned.
         } catch (error) {

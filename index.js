@@ -100,7 +100,7 @@ app.post('/request_eth', (req, res) => {
         status: resp.body,
       });
     }
-
+    // Generate Key
     // Send an email.
     res.sendFile(path.join(__dirname, 'check_email.html'));
     // res.json({
