@@ -7,6 +7,11 @@ import { dirname } from 'path';
 
 import rateLimit from 'express-rate-limit';
 
+import { validate_faucet_request, create_faucet_transaction, check_address_balance } from 'pauls_functions.js';
+
+import { getCursor } from './migrate.js';
+const db = getCursor();
+
 // es6 equivalent for the __dirname
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -68,9 +73,31 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
   if (typeof signedData !== 'string') {
     return res.status(400).json({ error: 'Signed data must be a string' });
   }  
-  
-  res.json({ 
-    status: 'valid'
+
+  const payload = {
+    email,
+    request_eth_address: requestEthAddress,
+    signed_data: signedData,
+  };
+  validate_faucet_request(db, payload)
+  .then(resp => {
+    if (resp.status_code !== 'success') {
+      res.json({
+        status: resp.body,
+      });
+    }
+
+    // Send an email.
+    res.json({
+      status: 'success',
+    });
+  })
+  .catch(err => {
+    console.error(`api: /request_eth post failed`, err);
+    
+    res.json({ 
+      status: 'failed',
+    });
   });
 });
 
