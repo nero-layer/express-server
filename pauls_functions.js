@@ -184,6 +184,8 @@ export async function create_faucet_transaction(db_cursor, request_obj){
             //     INSERT INTO transactions_in_progress_t (faucet_request_id, hot_wallet_address, to_wallet_address, tx_hash, gas_price)
             //     VALUES (?, ?, ?, ?, ?);
             // `, [faucet_request_id, hot_wallet_address, to_wallet_address, txResponse.hash, tx.gasPrice]);
+
+            // Todo: Need txResponse.hash to be returned.
         } catch (error) {
             console.error('Error sending transaction:', error);
             // TODO insert error into database
