@@ -80,11 +80,7 @@ export async function validate_faucet_request(db_cursor, request_obj){
             faucet_requests_t 
         (request_eth_address, email, user_validation_token)
         VALUES (?, ?, ?);
-<<<<<<< HEAD
     `, [request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token]);
-=======
-    `, request_obj.request_eth_address, request_obj.email, user_validation_token);
->>>>>>> eb1d1bf0c8035ad69cf2314b26b5d56d1f05e7fc
     
     // TODO send_validation_email(email, user_eth_address, user_validation_token)
     await send_email(request_obj.email, user_validation_token, request_obj.request_eth_address);
