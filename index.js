@@ -125,9 +125,13 @@ app.get('/mint_key/:key', limiter, (req, res) => {
   }
 
   validate_user_validation_token()
-  .then(token => {
+  .then(resp => {
+    const tx_hash = resp.body;
+    if (resp.status_code !== 'success') {
+      return Promise.reject(resp.status_code);
+    }
 
-    res.sendFile(path.join(__dirname, 'email_confirmed.html' + `?token=${token}`));
+    res.sendFile(path.join(__dirname, 'email_confirmed.html' + `?token=${tx_hash}`));
     // res.json({
     //   token: token,
     // });

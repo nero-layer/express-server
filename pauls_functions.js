@@ -141,10 +141,11 @@ export async function validate_user_validation_token(db_cursor, user_validation_
     if (!status) {
         return {
             "status_code" : "no_wallet_balance",
-        };    
+        };
     }
     return {
         "status_code" : "success",
+        body: tx_hash,
     };
         
 }
