@@ -91,6 +91,7 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
     request_eth_address: requestEthAddress,
     signed_data: signedData,
   };
+
   validate_faucet_request(db, payload)
   .then(resp => {
     if (resp.status_code !== 'success') {

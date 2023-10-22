@@ -1,30 +1,30 @@
 // Imports
-const nodemailer = require('nodemailer'); 
-const fs = require('fs');
+import nodemailer from 'nodemailer'; 
+import fs from 'fs';
 
 
 // Takes in the email address for email, the get request id, and the public key of the account
 // Sends email to email address specified
-async function send_email(email_address, get_req_id, public_key) {
+export async function send_email(email_address, get_req_id, public_key) {
   
   // Extract to environment variables
-  sending_email_address = process.env.OUTGOING_EMAIL_ADDR;
-  sending_email_address_password = process.env.OUTGOING_EMAIL_ADDR_PASSWD;
+  const sending_email_address = process.env.OUTGOING_EMAIL_ADDR;
+  const sending_email_address_password = process.env.OUTGOING_EMAIL_ADDR_PASSWD;
 
   //CONSTS
-  email_subject = "Mordor Faucet Email Verification";
-  email_html_file_path = "email_html.html";
+  const email_subject = "Mordor Faucet Email Verification";
+  const email_html_file_path = "email_html.html";
 
-  email_html_content = await fs.readFileSync(email_html_file_path, "utf8")
+  let email_html_content = await fs.readFileSync(email_html_file_path, "utf8")
 
-  domain =  process.env.DOMAIN;
+  const domain =  process.env.DOMAIN;
 
-  link_get_request = `${domain}?${get_req_id}`;
+  const link_get_request = `${domain}/mint_key/${get_req_id}`;
   email_html_content = email_html_content.replace("insert_link_here", link_get_request);
   email_html_content = email_html_content.replace("account", public_key);
 
   // Outlook email smtp configuration
-  mailer = nodemailer.createTransport({
+  const mailer = nodemailer.createTransport({
       service: "Outlook365",
       host: "smtp.office365.com",
       port: 587,
@@ -44,6 +44,14 @@ async function send_email(email_address, get_req_id, public_key) {
   }
 
   // Actually send email
-  mailer.sendMail(settings, (err, info) => {(err, info)} );  
+  return new Promise((resolve, reject) => {
+    mailer.sendMail(settings, (err, info) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(info.response);
+      }
+    });  
+  });
 
 };
