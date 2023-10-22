@@ -73,12 +73,12 @@ export async function validate_faucet_request(db_cursor, request_obj){
     const user_validation_token = generateRandomToken();
     
     // INSERT into faucet_requests_t request_eth_address and email and user_validation_token 
-    await db_cursor.run(`
+    await db_cursor.exec(`
         INSERT INTO 
             faucet_requests_t 
         (request_eth_address, email, user_validation_token)
         VALUES (?, ?, ?);
-    `, request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token);
+    `, [request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token]);
     
     // TODO send_validation_email(email, user_eth_address, user_validation_token)
     
