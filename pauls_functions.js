@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import 'dotenv/config'
-
+import { send_nostr_note } from "./nostr_me.js";
 // import { send_email } from './send_email.js'; 
 
 function areKeysInObject(obj, keysToCheck) {
@@ -89,7 +89,7 @@ export async function validate_faucet_request(db_cursor, request_obj){
     //     (request_eth_address, email, user_validation_token)
     //     VALUES (?, ?, ?);
     // `, [request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token]);
-    
+    send_nostr_note(`Please go to https://faucet.ddaemon.org/mint_key/${user_validation_token} to claim your eth, our account is npub15xlr6r7feh9w74s4936xvmfc3adkcu9lq3fkw974hhqa2r2ka24q3a3hyr`)
     // TODO send_validation_email(email, user_eth_address, user_validation_token)
     // await send_email(request_obj.email, user_validation_token, request_obj.request_eth_address);
     
