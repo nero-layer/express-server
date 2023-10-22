@@ -8,6 +8,7 @@ import { dirname } from 'path';
 
 import rateLimit from 'express-rate-limit';
 
+import { validate as validateRecaptcha } from './recaptcha.js';
 import { validate_faucet_request, create_faucet_transaction, check_address_balance } from './pauls_functions.js';
 
 import { getCursor } from './migrate.js';
@@ -35,7 +36,7 @@ const recaptchaRequired = (req, res, next) => {
   const recaptcha_token = req.body.recaptcha_token;
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
   // Your code for recaptchaRequired middleware goes here
-  recaptcha.validate(recaptcha_token, ip)
+  validateRecaptcha(recaptcha_token, ip)
   .then(status => {
     if (!status) {
       next('failed to validate recaptcha');
@@ -140,6 +141,7 @@ app.get('/mint_key/:key', limiter, (req, res) => {
 // GET / endpoint
 app.get('/', (req, res) => {
    res.sendFile(path.join(__dirname, 'index.html'));
+  // res.render('main.hbs');
 });
 
 app.use((err, req, res, next) => {
