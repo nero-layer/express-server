@@ -14,15 +14,10 @@ async function main(){
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email  TEXT,
             request_eth_address TEXT,
+            valid_request BOOLEAN,
+            user_validation_token TEXT,
+            transaction_sent BOOLEAN,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-        
-        CREATE TABLE IF NOT EXISTS requests_in_progress_t (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            faucet_request_id INTEGER,
-            emailed_secret TEXT
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (faucet_request_id) REFERENCES faucet_requests_t(id)
         );
         
         CREATE TABLE IF NOT EXISTS transactions_in_progress_t (

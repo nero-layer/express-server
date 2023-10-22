@@ -46,15 +46,16 @@ export async function validate_faucet_request(db_cursor, request_obj){
             request_eth_address = ?
             AND created_at < datetime('now', '-1 day');
     `).all(request_obj.request_eth_address);
+    // TODO generate user_validation_token
+    // TODO INSERT into faucet_requests_t request_eth_address and email and user_validation_token 
     if(check_already_requested != 0){
-        // TODO explain how long until they can request again
+        // TODO explain how long until they can request again in body
         return {
             "status_code" : "error",
             "body" : "Previous request was less than 24 Horus ago"
         }
     } else {
-        // TODO send validation email
-        create_faucet_transaction(db_cursor, request_obj)
+        // TODO send_validation_email(email, user_eth_address, user_validation_token)
         return {
             "status_code" : "success",
             "body" : `Check your email ${request_obj.email}, for email from`
@@ -62,8 +63,17 @@ export async function validate_faucet_request(db_cursor, request_obj){
     }
 }
 
-// This should be called every 30 seconds
-export async function check_validation_email(){}
+export async function validate_user_validation_token(user_validation_token){
+    // TODO select where user_validation_token = user_validation_token
+        // Make sure to select the eth address as well
+    // If valid
+        // create_faucet_transaction
+    // If already sent out
+        // Return tx.hash
+    // Else
+        // Return Error
+
+}
 
 export async function create_faucet_transaction(db_cursor, request_obj){
     // Check balance of hot wallet
@@ -89,7 +99,8 @@ export async function create_faucet_transaction(db_cursor, request_obj){
             const txResponse = await wallet.sendTransaction(tx);
             console.log("TX SENT")
             console.log('Transaction hash:', txResponse.hash);
-            // TODO insert into database
+            // TODO update faucet_requests_t transaction_sent = true
+            // TODO insert transactions transactions_in_progress_t
           } catch (error) {
             console.error('Error sending transaction:', error);
             // TODO insert error into database
