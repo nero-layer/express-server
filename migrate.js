@@ -50,3 +50,8 @@ async function main(){
 }
 
 main()
+
+export function getCursor() {
+    const db = new sqlite("./dev.db");
+    return db;
+}

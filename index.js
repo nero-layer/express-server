@@ -7,6 +7,11 @@ import { dirname } from 'path';
 import hbs from 'express-hbs'
 import rateLimit from 'express-rate-limit';
 
+import { validate_faucet_request, create_faucet_transaction, check_address_balance } from 'pauls_functions.js';
+
+import { getCursor } from './migrate.js';
+const db = getCursor();
+
 // es6 equivalent for the __dirname
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -26,11 +31,6 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
 });
 
-app.get('/', (req, res) => {
-  // Integrates the body of "home.hbs" inside the defaultLayout "main.hbs"
-  res.render('main');
-});
-
 app.get('/tx_hash/:code', limiter, (req, res) => {
   const code = req.params.code;
   // process tx_hash
@@ -41,9 +41,9 @@ app.get('/tx_hash/:code', limiter, (req, res) => {
   });
 });
 
-app.post('/request_eth', limiter, (req, res) => {
+app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
   const email = req.body.email;
-  const publicKey = req.body.public_key;
+  const requestEthAddress = req.body.request_eth_address;
   const signedData = req.body.signed_data;
   // process request
 
@@ -58,8 +58,8 @@ app.post('/request_eth', limiter, (req, res) => {
   }
 
   // Validate public key format (assuming it is a hexadecimal string)
-  const publicKeyRegex = /^[0-9a-fA-F]+$/;
-  if (!publicKeyRegex.test(publicKey) || publicKey.length !== 64) {
+  const requestEthAddressRegex = /^[0-9a-fA-F]+$/;
+  if (!requestEthAddressRegex.test(requestEthAddress) || requestEthAddress.length !== 64) {
     return res.status(400).json({ error: 'Invalid public key format' });
   }
 
@@ -67,9 +67,31 @@ app.post('/request_eth', limiter, (req, res) => {
   if (typeof signedData !== 'string') {
     return res.status(400).json({ error: 'Signed data must be a string' });
   }  
-  
-  res.json({ 
-    status: 'valid'
+
+  const payload = {
+    email,
+    request_eth_address: requestEthAddress,
+    signed_data: signedData,
+  };
+  validate_faucet_request(db, payload)
+  .then(resp => {
+    if (resp.status_code !== 'success') {
+      res.json({
+        status: resp.body,
+      });
+    }
+
+    // Send an email.
+    res.json({
+      status: 'success',
+    });
+  })
+  .catch(err => {
+    console.error(`api: /request_eth post failed`, err);
+    
+    res.json({ 
+      status: 'failed',
+    });
   });
 });
 
@@ -82,10 +104,17 @@ app.get('/mint_key/:key', limiter, (req, res) => {
     });
   }
 
-  const mintKey = 'demo mintKey';
-  
-  res.json({
-    mint_key: mintKey,
+  validate_user_validation_token()
+  .then(token => {
+    res.json({
+      token: token,
+    });
+  })
+  .catch(err => {
+    console.error(`failed to validate`, err);
+    res.json({
+      status: 'failed',
+    });
   });
 });
 
