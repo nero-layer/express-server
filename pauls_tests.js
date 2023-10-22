@@ -51,62 +51,65 @@ describe('Test Paul\'s Functions', async function () {
     })
   });
   describe('create_faucet_transaction', async function () {
-    // it('Check the balance of npx hardhat node account 0', async function () {
-    //     let old_balance = await check_address_balance(
-    //         "http://127.0.0.1:8545/",
-    //         "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-    //         18
-    //     )
-    //     let result = ""
-    //     try {
-    //         result = await create_faucet_transaction(
-    //             db_cursor,
-    //             {
-    //                 "email" : "test@gmail.com",
-    //                 "request_eth_address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-    //                 "signed_data": "TODO"
-    //             }
-    //         )
-    //     } catch (error) {
-    //         assert.equal(false, true, `check_address_balance errored out\n${error}`)
-    //     }
-    //     let new_balance = await check_address_balance(
-    //         "http://127.0.0.1:8545/",
-    //         "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-    //         18
-    //     )    
-    //     let difference = new_balance - old_balance
-    //     console.log(result)
-    //     console.log(difference)
-    // })
+    it('Check the balance of npx hardhat node account 0', async function () {
+        let test_eth_address = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+        let old_balance = await check_address_balance(
+            "http://127.0.0.1:8545/",
+            test_eth_address,
+            18
+        )
+        let result = ""
+        try {
+            result = await create_faucet_transaction(
+                db_cursor,
+                {
+                    "email" : "test@gmail.com",
+                    "request_eth_address": test_eth_address,
+                    "signed_data": "TODO"
+                }
+            )
+        } catch (error) {
+            console.log(error)
+            assert.equal(false, true, `check_address_balance errored out\n${error}`)
+        }
+        console.log(result)
+        let new_balance = await check_address_balance(
+            "http://127.0.0.1:8545/",
+            test_eth_address,
+            18
+        )    
+        let difference = new_balance - old_balance
+        console.log(result)
+        console.log(difference)
+    })
 
     // Import the function to test
 
     // Mock the database cursor
-    beforeEach((done) => {
-        // Create the required tables in memory database
-        db_cursor.exec(`
-        CREATE TABLE IF NOT EXISTS faucet_requests_t (
-            request_eth_address TEXT,
-            transaction_sent INTEGER DEFAULT 0
-        );
-        CREATE TABLE IF NOT EXISTS transactions_in_progress_t (
-            faucet_request_id INTEGER,
-            hot_wallet_address TEXT,
-            to_wallet_address TEXT,
-            tx_hash TEXT,
-            gas_price TEXT
-        );
-        `, done);
-    });
+    // beforeEach((done) => {
+    //     // Create the required tables in memory database
+    //     db_cursor.exec(`
+    //     CREATE TABLE IF NOT EXISTS faucet_requests_t (
+    //         request_eth_address TEXT,
+    //         transaction_sent INTEGER DEFAULT 0
+    //     );
+    //     CREATE TABLE IF NOT EXISTS transactions_in_progress_t (
+    //         faucet_request_id INTEGER,
+    //         hot_wallet_address TEXT,
+    //         to_wallet_address TEXT,
+    //         tx_hash TEXT,
+    //         gas_price TEXT
+    //     );
+    //     `, done);
+    // });
 
-    afterEach((done) => {
-        // Clear the tables after each test
-        db_cursor.exec(`
-            DELETE FROM faucet_requests_t;
-            DELETE FROM transactions_in_progress_t;
-        `, done);
-    });
+    // afterEach((done) => {
+    //     // Clear the tables after each test
+    //     db_cursor.exec(`
+    //         DELETE FROM faucet_requests_t;
+    //         DELETE FROM transactions_in_progress_t;
+    //     `, done);
+    // });
 
     // it('should update faucet_requests_t and insert into transactions_in_progress_t when hot_wallet_balance is greater than 1', async () => {
     //     // Stub the check_address_balance function
