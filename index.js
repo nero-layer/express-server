@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
+import hbs from 'express-hbs'
 import rateLimit from 'express-rate-limit';
 
 // es6 equivalent for the __dirname
@@ -13,10 +13,22 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.engine('hbs', hbs.express4({
+  layoutsDir: __dirname + '/views/layouts',
+  extname: '.hbs',
+  defaultLayout: 'main'
+}));
+app.set('view engine', 'hbs');
+// app.set('views', __dirname + '/views');
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
+});
+
+app.get('/', (req, res) => {
+  // Integrates the body of "home.hbs" inside the defaultLayout "main.hbs"
+  res.render('main');
 });
 
 app.get('/tx_hash/:code', limiter, (req, res) => {

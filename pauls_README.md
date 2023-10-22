@@ -7,6 +7,10 @@
 npm install better-sqlite3
 npm install mocha chai --save-dev
 npm install ethers@5.6
+npm i hbs
+npm i express-hbs
+npm i express
+npm i express-rate-limit
 ```
 
 ## Install and Configure
