@@ -49,7 +49,6 @@ app.get('/main', (req, res) => {
   return res.render('main');
 });
 
-
 app.get('/tx_hash/:code', limiter, (req, res) => {
   const code = req.params.code;
   // process tx_hash
@@ -102,9 +101,10 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
     }
 
     // Send an email.
-    res.json({
-      status: 'success',
-    });
+    res.sendFile(path.join(__dirname, 'check_email.html'));
+    // res.json({
+    //   status: 'success',
+    // });
   })
   .catch(err => {
     console.error(`api: /request_eth post failed`, err);
@@ -125,10 +125,16 @@ app.get('/mint_key/:key', limiter, (req, res) => {
   }
 
   validate_user_validation_token()
-  .then(token => {
-    res.json({
-      token: token,
-    });
+  .then(resp => {
+    const tx_hash = resp.body;
+    if (resp.status_code !== 'success') {
+      return Promise.reject(resp.status_code);
+    }
+
+    res.sendFile(path.join(__dirname, 'email_confirmed.html' + `?token=${tx_hash}`));
+    // res.json({
+    //   token: token,
+    // });
   })
   .catch(err => {
     console.error(`failed to validate`, err);
