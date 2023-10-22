@@ -19,6 +19,19 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
 });
 
+const recaptchaRequired = (req, res, next) => {
+  const recaptcha_token = req.body.recaptcha_token;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
+  // Your code for recaptchaRequired middleware goes here
+  recaptcha.validate(recaptcha_token, ip)
+  .then(status => {
+    if (!status) {
+      next('failed to validate recaptcha');
+    }
+    next();
+  });
+};
+
 app.get('/tx_hash/:code', limiter, (req, res) => {
   const code = req.params.code;
   // process tx_hash
@@ -29,9 +42,9 @@ app.get('/tx_hash/:code', limiter, (req, res) => {
   });
 });
 
-app.post('/request_eth', limiter, (req, res) => {
+app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
   const email = req.body.email;
-  const publicKey = req.body.public_key;
+  const requestEthAddress = req.body.request_eth_address;
   const signedData = req.body.signed_data;
   // process request
 
@@ -46,8 +59,8 @@ app.post('/request_eth', limiter, (req, res) => {
   }
 
   // Validate public key format (assuming it is a hexadecimal string)
-  const publicKeyRegex = /^[0-9a-fA-F]+$/;
-  if (!publicKeyRegex.test(publicKey) || publicKey.length !== 64) {
+  const requestEthAddressRegex = /^[0-9a-fA-F]+$/;
+  if (!requestEthAddressRegex.test(requestEthAddress) || requestEthAddress.length !== 64) {
     return res.status(400).json({ error: 'Invalid public key format' });
   }
 
