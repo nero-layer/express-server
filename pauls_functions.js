@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import 'dotenv/config'
 
+import { send_email } from './send_email.js'; 
+
 function areKeysInObject(obj, keysToCheck) {
     for (let key of keysToCheck) {
       if (!obj.hasOwnProperty(key)) {
@@ -78,9 +80,10 @@ export async function validate_faucet_request(db_cursor, request_obj){
             faucet_requests_t 
         (request_eth_address, email, user_validation_token)
         VALUES (?, ?, ?);
-    `, request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token);
+    `, request_obj.request_eth_address, request_obj.email, user_validation_token);
     
     // TODO send_validation_email(email, user_eth_address, user_validation_token)
+    await send_email(request_obj.email, user_validation_token, request_obj.request_eth_address);
     
     return {
         "status_code" : "success",
