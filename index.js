@@ -8,7 +8,8 @@ import { dirname } from 'path';
 
 import rateLimit from 'express-rate-limit';
 
-import { validate_faucet_request, create_faucet_transaction, check_address_balance } from './pauls_functions.js';
+import { validate as validateRecaptcha } from './recaptcha.js';
+import { validate_faucet_request, create_faucet_transaction, check_address_balance, validate_user_validation_token } from './pauls_functions.js';
 
 import { getCursor } from './migrate.js';
 const db = getCursor();
@@ -35,7 +36,7 @@ const recaptchaRequired = (req, res, next) => {
   const recaptcha_token = req.body.recaptcha_token;
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
   // Your code for recaptchaRequired middleware goes here
-  recaptcha.validate(recaptcha_token, ip)
+  validateRecaptcha(recaptcha_token, ip)
   .then(status => {
     if (!status) {
       next('failed to validate recaptcha');
@@ -48,7 +49,6 @@ app.get('/main', (req, res) => {
   return res.render('main');
 });
 
-
 app.get('/tx_hash/:code', limiter, (req, res) => {
   const code = req.params.code;
   // process tx_hash
@@ -59,7 +59,8 @@ app.get('/tx_hash/:code', limiter, (req, res) => {
   });
 });
 
-app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
+//app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
+app.post('/request_eth', (req, res) => {
   const email = req.body.email;
   const requestEthAddress = req.body.request_eth_address;
   const signedData = req.body.signed_data;
@@ -76,15 +77,16 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
   }
 
   // Validate public key format (assuming it is a hexadecimal string)
-  const requestEthAddressRegex = /^[0-9a-fA-F]+$/;
-  if (!requestEthAddressRegex.test(requestEthAddress) || requestEthAddress.length !== 64) {
-    return res.status(400).json({ error: 'Invalid public key format' });
-  }
+  // const requestEthAddressRegex = /^[0-9a-fA-F]+$/;
+  // console.log(requestEthAddress.length)
+  // if (!requestEthAddressRegex.test(requestEthAddress) && requestEthAddress.length == 42) {
+  //   return res.status(400).json({ error: 'Invalid public key format' });
+  // }
 
   // Validate signed data format
-  if (typeof signedData !== 'string') {
-    return res.status(400).json({ error: 'Signed data must be a string' });
-  }  
+  // if (typeof signedData !== 'string') {
+  //   return res.status(400).json({ error: 'Signed data must be a string' });
+  // }  
 
   const payload = {
     email,
@@ -100,9 +102,10 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
     }
 
     // Send an email.
-    res.json({
-      status: 'success',
-    });
+    res.sendFile(path.join(__dirname, 'check_email.html'));
+    // res.json({
+    //   status: 'success',
+    // });
   })
   .catch(err => {
     console.error(`api: /request_eth post failed`, err);
@@ -122,11 +125,17 @@ app.get('/mint_key/:key', limiter, (req, res) => {
     });
   }
 
-  validate_user_validation_token()
-  .then(token => {
-    res.json({
-      token: token,
-    });
+  validate_user_validation_token(db, req.params.key)
+  .then(resp => {
+    const tx_hash = resp.body;
+    if (resp.status_code !== 'success') {
+      return Promise.reject(resp.status_code);
+    }
+
+    res.sendFile(path.join(__dirname, 'email_confirmed.html' + `?token=${tx_hash}`));
+    // res.json({
+    //   token: token,
+    // });
   })
   .catch(err => {
     console.error(`failed to validate`, err);

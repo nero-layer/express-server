@@ -5,7 +5,7 @@ import { config } from './email_config.js'
 
 // Takes in the email address for email, the get request id, and the public key of the account
 // Sends email to email address specified
-async function send_email(email_address, get_req_id, public_key) {
+export async function send_email(email_address, get_req_id, public_key) {
   
   // Extract to environment variables
   var sending_email_address = config.outgoing_email_address;

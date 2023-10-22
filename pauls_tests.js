@@ -7,17 +7,20 @@ import {validate_faucet_request} from "./pauls_functions.js"
 import {check_address_balance} from "./pauls_functions.js"
 import {create_faucet_transaction} from "./pauls_functions.js"
 
+import sinon from 'sinon';
 
 import sqlite from 'better-sqlite3';
 
+import axios from 'axios';
+
 describe('Test Paul\'s Functions', async function () {
-  const db = new sqlite("./dev.db");
+  const db_cursor = new sqlite("./dev.db");
   describe('validate_faucet_request', async function () {
     it('should take in a valid email', async function () {
         let result = ""
         try {
             result = await validate_faucet_request(
-                db,
+                db_cursor,
                 {
                     "email" : "test@gmail.com",
                     "request_eth_address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
@@ -26,8 +29,10 @@ describe('Test Paul\'s Functions', async function () {
             )
             assert.equal(result.status_code == "success", true)
         } catch (error) {
+            console.log(error)
             assert.equal(false, true, `validate_faucet_request errored out\n${error}`)
         }
+        // console.log(result)
         assert.equal(result.status_code == "success", true)
     })
   });
@@ -48,40 +53,70 @@ describe('Test Paul\'s Functions', async function () {
   });
   describe('create_faucet_transaction', async function () {
     it('Check the balance of npx hardhat node account 0', async function () {
+        let test_eth_address = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
         let old_balance = await check_address_balance(
             "http://127.0.0.1:8545/",
-            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            test_eth_address,
             18
         )
         let result = ""
         try {
             result = await create_faucet_transaction(
-                db,
+                db_cursor,
                 {
                     "email" : "test@gmail.com",
-                    "request_eth_address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "request_eth_address": test_eth_address,
                     "signed_data": "TODO"
                 }
             )
         } catch (error) {
+            console.log(error)
             assert.equal(false, true, `check_address_balance errored out\n${error}`)
         }
+        // console.log(result)
         let new_balance = await check_address_balance(
             "http://127.0.0.1:8545/",
-            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            test_eth_address,
             18
         )    
         let difference = new_balance - old_balance
-        console.log(result)
-        console.log(difference)
+        // console.log(result)
+        // console.log(difference)
+        })
     })
-  });
-  
-  // Describe another test case
-  describe('#filter()', function () {
-    // Test case 4: It should return an array with filtered values
-    it('should return an array with filtered values', function () {
-      assert.deepEqual([1, 2, 3, 4, 5].filter(n => n % 2 === 0), [2, 4]);
-    });
-  });
+    describe('End to End Test', async function () {
+        let test_url = "http://127.0.0.1:3000"
+        let mint_key = ""
+        it('Submit form to /request_eth', async function () {
+            const data = {
+                "email" : "test@gmail.com",
+                "request_eth_address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                "signed_data": "TODO"
+            }
+            const headers =  {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+              }
+            // console.log(test_url + "/request_eth")
+            const response = await axios.post(test_url + "/request_eth", data, headers);
+            // console.log(response)
+        })
+        it('Get link from email /mint_key', async function () {
+            // Insert into the database
+            mint_key =  "asdf"
+            await db_cursor.exec(`
+                INSERT INTO 
+                    faucet_requests_t 
+                (request_eth_address, email, user_validation_token)
+                VALUES (?, ?, ?);
+            `, ["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "Testing Email",]);
+            const response = await axios.get(test_url + "/mint_key/" + mint_key);
+            console.log(response)
+        })
+        it('Get Transaction has from /mint_key', async function () {
+            console.log("Placeholder")
+        })
+
+   });
 });

@@ -1,12 +1,14 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import hbs from 'express-hbs'
 
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import hbs from 'express-hbs'
+
 import rateLimit from 'express-rate-limit';
 
+import { validate as validateRecaptcha } from './recaptcha.js';
 import { validate_faucet_request, create_faucet_transaction, check_address_balance } from './pauls_functions.js';
 
 import { getCursor } from './migrate.js';
@@ -24,24 +26,27 @@ app.engine('hbs', hbs.express4({
   defaultLayout: 'main'
 }));
 app.set('view engine', 'hbs');
-// app.set('views', __dirname + '/views');
-
-const recaptchaRequired = (req, res, next) => {
-    const recaptcha_token = req.body.recaptcha_token;
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
-    // Your code for recaptchaRequired middleware goes here
-    recaptcha.validate(recaptcha_token, ip)
-    .then(status => {
-      if (!status) {
-        next('failed to validate recaptcha');
-      }
-      next();
-    });
-  };
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
+});
+
+const recaptchaRequired = (req, res, next) => {
+  const recaptcha_token = req.body.recaptcha_token;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
+  // Your code for recaptchaRequired middleware goes here
+  validateRecaptcha(recaptcha_token, ip)
+  .then(status => {
+    if (!status) {
+      next('failed to validate recaptcha');
+    }
+    next();
+  });
+};
+
+app.get('/main', (req, res) => {
+  return res.render('main');
 });
 
 app.get('/tx_hash/:code', limiter, (req, res) => {
@@ -77,15 +82,16 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
   }
 
   // Validate signed data format
-  if (typeof signedData !== 'string') {
-    return res.status(400).json({ error: 'Signed data must be a string' });
-  }  
+  // if (typeof signedData !== 'string') {
+  //   return res.status(400).json({ error: 'Signed data must be a string' });
+  // }  
 
   const payload = {
     email,
     request_eth_address: requestEthAddress,
     signed_data: signedData,
   };
+
   validate_faucet_request(db, payload)
   .then(resp => {
     if (resp.status_code !== 'success') {
@@ -95,9 +101,10 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
     }
 
     // Send an email.
-    res.json({
-      status: 'success',
-    });
+    res.sendFile(path.join(__dirname, 'check_email.html'));
+    // res.json({
+    //   status: 'success',
+    // });
   })
   .catch(err => {
     console.error(`api: /request_eth post failed`, err);
@@ -118,10 +125,16 @@ app.get('/mint_key/:key', limiter, (req, res) => {
   }
 
   validate_user_validation_token()
-  .then(token => {
-    res.json({
-      token: token,
-    });
+  .then(resp => {
+    const tx_hash = resp.body;
+    if (resp.status_code !== 'success') {
+      return Promise.reject(resp.status_code);
+    }
+
+    res.sendFile(path.join(__dirname, 'email_confirmed.html' + `?token=${tx_hash}`));
+    // res.json({
+    //   token: token,
+    // });
   })
   .catch(err => {
     console.error(`failed to validate`, err);
