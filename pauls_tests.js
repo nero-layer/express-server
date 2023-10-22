@@ -35,21 +35,21 @@ describe('Test Paul\'s Functions', async function () {
         assert.equal(result.status_code == "success", true)
     })
   });
-//   describe('check_address_balance', async function () {
-//     it('Check the balance of npx hardhat node account 0', async function () {
-//         let result = ""
-//         try {
-//             result = await check_address_balance(
-//                 "http://127.0.0.1:8545/",
-//                 "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-//                 18
-//             )
-//         } catch (error) {
-//             assert.equal(false, true, `check_address_balance errored out\n${error}`)
-//         }
-//         assert.equal(result > 1, true, "Looks like that account, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, has nothing")  
-//     })
-//   });
+  describe('check_address_balance', async function () {
+    it('Check the balance of npx hardhat node account 0', async function () {
+        let result = ""
+        try {
+            result = await check_address_balance(
+                "http://127.0.0.1:8545/",
+                "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                18
+            )
+        } catch (error) {
+            assert.equal(false, true, `check_address_balance errored out\n${error}`)
+        }
+        assert.equal(result > 1, true, "Looks like that account, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, has nothing")  
+    })
+  });
   describe('create_faucet_transaction', async function () {
     // it('Check the balance of npx hardhat node account 0', async function () {
     //     let old_balance = await check_address_balance(
