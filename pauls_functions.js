@@ -134,8 +134,15 @@ export async function validate_user_validation_token(db_cursor, user_validation_
     const payload = {
         request_eth_address,
     };
-    await create_faucet_transaction(db_cursor, payload);
-    
+    const status = await create_faucet_transaction(db_cursor, payload);
+    if (!status) {
+        return {
+            "status_code" : "no_wallet_balance",
+        };    
+    }
+    return {
+        "status_code" : "success",
+    };
         
 }
 
