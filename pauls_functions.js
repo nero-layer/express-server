@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import 'dotenv/config'
 
-import { send_email } from './send_email.js'; 
+// import { send_email } from './send_email.js'; 
 
 function areKeysInObject(obj, keysToCheck) {
     for (let key of keysToCheck) {
@@ -83,7 +83,7 @@ export async function validate_faucet_request(db_cursor, request_obj){
     `, [request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token]);
     
     // TODO send_validation_email(email, user_eth_address, user_validation_token)
-    await send_email(request_obj.email, user_validation_token, request_obj.request_eth_address);
+    // await send_email(request_obj.email, user_validation_token, request_obj.request_eth_address);
     
     return {
         "status_code" : "success",
@@ -152,39 +152,37 @@ export async function validate_user_validation_token(db_cursor, user_validation_
 export async function create_faucet_transaction(db_cursor, request_obj){
     // Check balance of hot wallet
     let hot_wallet_balance = await check_address_balance(process.env.RPC_URL, process.env.HOT_WALLET_ADDRESS);
-    console.log("process.env.RPC_URL")
-    console.log(process.env.RPC_URL)
-    console.log("process.env.HOT_WALLET_ADDRESS")
-    console.log(process.env.HOT_WALLET_ADDRESS)
-    console.log(hot_wallet_balance)
+    // console.log("process.env.RPC_URL")
+    // console.log(process.env.RPC_URL)
+    // console.log("process.env.HOT_WALLET_ADDRESS")
+    // console.log(process.env.HOT_WALLET_ADDRESS)
+    // console.log(hot_wallet_balance)
     if(hot_wallet_balance > 1){
         let provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
         const wallet = new ethers.Wallet(process.env.HOT_WALLET_PRIVATE_KEY, provider);
         const amountToSend = ethers.utils.parseEther('0.1'); 
-
         const tx = {
             to: request_obj.request_eth_address,
             value: amountToSend,
             gasLimit: 21000, // Adjust gas limit as needed
             gasPrice: ethers.utils.parseUnits('100', 'gwei'), // Adjust gas price as needed
         };
-        console.log("TX TIME")
         try {
             const txResponse = await wallet.sendTransaction(tx);
-            console.log("TX SENT")
-            console.log('Transaction hash:', txResponse.hash);
+            // console.log("TX SENT")
+            // console.log('Transaction hash:', txResponse.hash);
             // update faucet_requests_t transaction_sent = true
-            await db_cursor.run(`
+            await db_cursor.exec(`
                 UPDATE faucet_requests_t
                 SET transaction_sent = true
                 WHERE request_eth_address = ?;
             `, request_obj.request_eth_address);
             // insert transactions transactions_in_progress_t
 
-            await db_cursor.run(`
-                INSERT INTO transactions_in_progress_t (faucet_request_id, hot_wallet_address, to_wallet_address, tx_hash, gas_price)
-                VALUES (?, ?, ?, ?, ?);
-            `, faucet_request_id, hot_wallet_address, to_wallet_address, txResponse.hash, tx.gasPrice);
+            // await db_cursor.exec(`
+            //     INSERT INTO transactions_in_progress_t (faucet_request_id, hot_wallet_address, to_wallet_address, tx_hash, gas_price)
+            //     VALUES (?, ?, ?, ?, ?);
+            // `, [faucet_request_id, hot_wallet_address, to_wallet_address, txResponse.hash, tx.gasPrice]);
         } catch (error) {
             console.error('Error sending transaction:', error);
             // TODO insert error into database
