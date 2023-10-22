@@ -73,14 +73,22 @@ export async function validate_faucet_request(db_cursor, request_obj){
 
     //  generate user_validation_token
     const user_validation_token = generateRandomToken();
-    
+    console.log("user_validation_token")
+    console.log(user_validation_token)
+
     // INSERT into faucet_requests_t request_eth_address and email and user_validation_token 
-    await db_cursor.exec(`
-        INSERT INTO 
-            faucet_requests_t 
+    const insertStmt = db_cursor.prepare(`
+    INSERT INTO 
+        faucet_requests_t 
         (request_eth_address, email, user_validation_token)
-        VALUES (?, ?, ?);
-    `, [request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token]);
+        VALUES (?, ?, ?);`);
+    await insertStmt.run(request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token);
+    // await db_cursor.exec(`
+    //     INSERT INTO 
+    //         faucet_requests_t 
+    //     (request_eth_address, email, user_validation_token)
+    //     VALUES (?, ?, ?);
+    // `, [request_obj.request_eth_address, request_obj.email, request_obj.user_validation_token]);
     
     // TODO send_validation_email(email, user_eth_address, user_validation_token)
     // await send_email(request_obj.email, user_validation_token, request_obj.request_eth_address);
@@ -111,6 +119,8 @@ export async function validate_user_validation_token(db_cursor, user_validation_
             user_validation_token = ?
             LIMIT 1;
     `).get(user_validation_token);
+    console.log("request_eth_address")
+    console.log(request_eth_address)
 
     if (!request_eth_address) {
         return {
@@ -118,20 +128,21 @@ export async function validate_user_validation_token(db_cursor, user_validation_
             "body" : `the validation token does not exist`,
         };
     }
-    if (transaction_sent) {
-        const transactionInProgress = await db_cursor.prepare(`
-            SELECT tx_hash
-            FROM transactions_in_progress_t
-            WHERE faucet_request_id = ?;
-        `).get(faucet_request_id);
+    // TODO 
+    // if (transaction_sent) {
+    //     const transactionInProgress = await db_cursor.prepare(`
+    //         SELECT tx_hash
+    //         FROM transactions_in_progress_t
+    //         WHERE faucet_request_id = ?;
+    //     `).get(faucet_request_id);
 
-        if (transactionInProgress) {
-            return {
-                "status_code" : "success",
-                "body" : transactionInProgress.tx_hash,
-            };
-        }
-    }
+    //     if (transactionInProgress) {
+    //         return {
+    //             "status_code" : "success",
+    //             "body" : transactionInProgress.tx_hash,
+    //         };
+    //     }
+    // }
     
     
     const payload = {

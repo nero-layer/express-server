@@ -127,23 +127,22 @@ app.get('/mint_key/:key', limiter, (req, res) => {
 
   validate_user_validation_token(db, req.params.key)
   .then(resp => {
-    const tx_hash = resp.body;
-    if (resp.status_code !== 'success') {
-      return Promise.reject(resp.status_code);
-    }
-
-    res.sendFile(path.join(__dirname, 'email_confirmed.html' + `?token=${tx_hash}`));
-    // res.json({
-    //   token: token,
-    // });
+        const tx_hash = resp.body;
+        if (resp.status_code !== 'success') {
+          return Promise.reject(resp.status_code);
+        }
+        res.sendFile(path.join(__dirname, 'email_confirmed.html' + `?token=${tx_hash}`));
+          // res.json({
+          //   token: token,
+          // });
   })
   .catch(err => {
-    console.error(`failed to validate`, err);
-    res.json({
-      status: 'failed',
-    });
+        console.error(`failed to validate_user_validation_token`, err);
+        res.json({
+          status: 'failed',
+        });
+      });
   });
-});
 
 // GET / endpoint
 app.get('/', (req, res) => {

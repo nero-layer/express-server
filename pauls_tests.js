@@ -104,15 +104,15 @@ describe('Test Paul\'s Functions', async function () {
         })
         it('Get link from email /mint_key', async function () {
             // Insert into the database
-            mint_key =  "asdf"
-            await db_cursor.exec(`
-                INSERT INTO 
-                    faucet_requests_t 
+            mint_key =  "56236642689da070ca8bf0f1c70a8bebe5c938cadf0e0aad5619e0b1f905ab8c"
+            const insertStmt = db_cursor.prepare(`
+            INSERT INTO 
+                faucet_requests_t 
                 (request_eth_address, email, user_validation_token)
-                VALUES (?, ?, ?);
-            `, ["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "Testing Email",]);
+                VALUES (?, ?, ?);`);
+            await insertStmt.run("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "Testing Email", mint_key);
             const response = await axios.get(test_url + "/mint_key/" + mint_key);
-            console.log(response)
+            console.log(response.data)
         })
         it('Get Transaction has from /mint_key', async function () {
             console.log("Placeholder")
