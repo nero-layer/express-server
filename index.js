@@ -83,9 +83,9 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
   }
 
   // Validate signed data format
-  if (typeof signedData !== 'string') {
-    return res.status(400).json({ error: 'Signed data must be a string' });
-  }  
+  // if (typeof signedData !== 'string') {
+  //   return res.status(400).json({ error: 'Signed data must be a string' });
+  // }  
 
   const payload = {
     email,
