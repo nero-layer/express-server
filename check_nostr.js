@@ -8,10 +8,10 @@ const purplepag = "wss://purplepag.es"
 let nchat = "wss://relay1.nostrchat.io"
 const relays = [damus, scsi, purplepag]
 
-const relay = relayInit(damus)
+const relay = relayInit(scsi)
 await relay.connect()
 console.log("Checking")
 let event_check = await relay.get({
-    ids: ["7cc100fea7336f156757a09d23290785c857f3ce27d1f57a5d2bad1ebafec1a8"],
+    ids: ["c5cd241bc04f0f287e35cdd2988a8bc7e84d6ee2c509f9acaf9a1c2d46853b43"],
   })
 console.log(event_check)
