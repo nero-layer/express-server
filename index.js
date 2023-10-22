@@ -125,7 +125,7 @@ app.get('/mint_key/:key', limiter, (req, res) => {
     });
   }
 
-  validate_user_validation_token()
+  validate_user_validation_token(db, req.params.key)
   .then(resp => {
     const tx_hash = resp.body;
     if (resp.status_code !== 'success') {
