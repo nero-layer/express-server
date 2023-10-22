@@ -9,7 +9,7 @@ import { dirname } from 'path';
 import rateLimit from 'express-rate-limit';
 
 import { validate as validateRecaptcha } from './recaptcha.js';
-import { validate_faucet_request, create_faucet_transaction, check_address_balance } from './pauls_functions.js';
+import { validate_faucet_request, create_faucet_transaction, check_address_balance, validate_user_validation_token } from './pauls_functions.js';
 
 import { getCursor } from './migrate.js';
 const db = getCursor();
@@ -59,7 +59,8 @@ app.get('/tx_hash/:code', limiter, (req, res) => {
   });
 });
 
-app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
+//app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
+app.post('/request_eth', (req, res) => {
   const email = req.body.email;
   const requestEthAddress = req.body.request_eth_address;
   const signedData = req.body.signed_data;
@@ -76,10 +77,11 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
   }
 
   // Validate public key format (assuming it is a hexadecimal string)
-  const requestEthAddressRegex = /^[0-9a-fA-F]+$/;
-  if (!requestEthAddressRegex.test(requestEthAddress) || requestEthAddress.length !== 64) {
-    return res.status(400).json({ error: 'Invalid public key format' });
-  }
+  // const requestEthAddressRegex = /^[0-9a-fA-F]+$/;
+  // console.log(requestEthAddress.length)
+  // if (!requestEthAddressRegex.test(requestEthAddress) && requestEthAddress.length == 42) {
+  //   return res.status(400).json({ error: 'Invalid public key format' });
+  // }
 
   // Validate signed data format
   // if (typeof signedData !== 'string') {
@@ -91,7 +93,6 @@ app.post('/request_eth', limiter, recaptchaRequired, (req, res) => {
     request_eth_address: requestEthAddress,
     signed_data: signedData,
   };
-
   validate_faucet_request(db, payload)
   .then(resp => {
     if (resp.status_code !== 'success') {
