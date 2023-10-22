@@ -103,7 +103,12 @@
       })
         .then(res => {
           console.log("We got a response")
-          console.log(res)
+          res.json().then(res => {
+            console.log(res)
+            if(res.status_code == "success"){
+              window.location.href = `/check_email/${email}`; 
+            }
+          })
         })
         .catch(err => {
           window.alert(err);

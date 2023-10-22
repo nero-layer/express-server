@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.engine('hbs', hbs.express4({
   layoutsDir: __dirname + '/views/layouts',
   extname: '.hbs',
-  defaultLayout: 'main'
+  // defaultLayout: 'main'
 }));
 app.set('view engine', 'hbs');
 
@@ -96,13 +96,15 @@ app.post('/request_eth', (req, res) => {
   validate_faucet_request(db, payload)
   .then(resp => {
     if (resp.status_code !== 'success') {
-      res.json({
+      return res.json({
         status: resp.body,
       });
     }
+    return res.json(resp);
     // Generate Key
     // Send an email.
-    res.sendFile(path.join(__dirname, 'check_email.html'));
+    // res.json(resp)
+    // res.sendFile(path.join(__dirname, 'check_email.html'));
     // res.json({
     //   status: 'success',
     // });
@@ -147,6 +149,13 @@ app.get('/mint_key/:key', limiter, (req, res) => {
 // GET / endpoint
 app.get('/', (req, res) => {
    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/check_email/:email', (req, res) => {
+  const email = req.params.email;
+  return res.render('email', {
+    email : email
+  });
 });
 
 app.use((err, req, res, next) => {
