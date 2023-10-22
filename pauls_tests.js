@@ -83,30 +83,30 @@ describe('Test Paul\'s Functions', async function () {
     // Import the function to test
 
     // Mock the database cursor
-    // beforeEach((done) => {
-    //     // Create the required tables in memory database
-    //     db_cursor.exec(`
-    //     CREATE TABLE IF NOT EXISTS faucet_requests_t (
-    //         request_eth_address TEXT,
-    //         transaction_sent INTEGER DEFAULT 0
-    //     );
-    //     CREATE TABLE IF NOT EXISTS transactions_in_progress_t (
-    //         faucet_request_id INTEGER,
-    //         hot_wallet_address TEXT,
-    //         to_wallet_address TEXT,
-    //         tx_hash TEXT,
-    //         gas_price TEXT
-    //     );
-    //     `, done);
-    // });
+    beforeEach((done) => {
+        // Create the required tables in memory database
+        db_cursor.exec(`
+        CREATE TABLE IF NOT EXISTS faucet_requests_t (
+            request_eth_address TEXT,
+            transaction_sent INTEGER DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS transactions_in_progress_t (
+            faucet_request_id INTEGER,
+            hot_wallet_address TEXT,
+            to_wallet_address TEXT,
+            tx_hash TEXT,
+            gas_price TEXT
+        );
+        `, done);
+    });
 
-    // afterEach((done) => {
-    //     // Clear the tables after each test
-    //     db_cursor.exec(`
-    //         DELETE FROM faucet_requests_t;
-    //         DELETE FROM transactions_in_progress_t;
-    //     `, done);
-    // });
+    afterEach((done) => {
+        // Clear the tables after each test
+        db_cursor.exec(`
+            DELETE FROM faucet_requests_t;
+            DELETE FROM transactions_in_progress_t;
+        `, done);
+    });
 
     // it('should update faucet_requests_t and insert into transactions_in_progress_t when hot_wallet_balance is greater than 1', async () => {
     //     // Stub the check_address_balance function
