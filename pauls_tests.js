@@ -11,6 +11,7 @@ import sinon from 'sinon';
 
 import sqlite from 'better-sqlite3';
 
+import axios from 'axios';
 
 describe('Test Paul\'s Functions', async function () {
   const db_cursor = new sqlite("./dev.db");
@@ -81,18 +82,41 @@ describe('Test Paul\'s Functions', async function () {
         let difference = new_balance - old_balance
         // console.log(result)
         // console.log(difference)
+        })
     })
+    describe('End to End Test', async function () {
+        let test_url = "http://127.0.0.1:3000"
+        let mint_key = ""
+        it('Submit form to /request_eth', async function () {
+            const data = {
+                "email" : "test@gmail.com",
+                "request_eth_address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                "signed_data": "TODO"
+            }
+            const headers =  {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+              }
+            // console.log(test_url + "/request_eth")
+            const response = await axios.post(test_url + "/request_eth", data, headers);
+            // console.log(response)
+        })
+        it('Get link from email /mint_key', async function () {
+            // Insert into the database
+            mint_key =  "asdf"
+            await db_cursor.exec(`
+                INSERT INTO 
+                    faucet_requests_t 
+                (request_eth_address, email, user_validation_token)
+                VALUES (?, ?, ?);
+            `, ["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "Testing Email",]);
+            const response = await axios.get(test_url + "/mint_key/" + mint_key);
+            console.log(response)
+        })
+        it('Get Transaction has from /mint_key', async function () {
+            console.log("Placeholder")
+        })
 
-    // Add more test cases as needed
-  //});
-
-
-  
-//   // Describe another test case
-//   describe('#filter()', function () {
-//     // Test case 4: It should return an array with filtered values
-//     it('should return an array with filtered values', function () {
-//       assert.deepEqual([1, 2, 3, 4, 5].filter(n => n % 2 === 0), [2, 4]);
-//     });
    });
 });
