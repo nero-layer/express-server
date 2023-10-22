@@ -110,10 +110,17 @@ app.get('/mint_key/:key', limiter, (req, res) => {
     });
   }
 
-  const mintKey = 'demo mintKey';
-  
-  res.json({
-    mint_key: mintKey,
+  validate_user_validation_token()
+  .then(token => {
+    res.json({
+      token: token,
+    });
+  })
+  .catch(err => {
+    console.error(`failed to validate`, err);
+    res.json({
+      status: 'failed',
+    });
   });
 });
 
