@@ -1,11 +1,10 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import hbs from 'express-hbs'
 
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
+import hbs from 'express-hbs'
 import rateLimit from 'express-rate-limit';
 
 import { validate_faucet_request, create_faucet_transaction, check_address_balance } from './pauls_functions.js';
@@ -25,29 +24,25 @@ app.engine('hbs', hbs.express4({
   defaultLayout: 'main'
 }));
 app.set('view engine', 'hbs');
+// app.set('views', __dirname + '/views');
+
+const recaptchaRequired = (req, res, next) => {
+    const recaptcha_token = req.body.recaptcha_token;
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
+    // Your code for recaptchaRequired middleware goes here
+    recaptcha.validate(recaptcha_token, ip)
+    .then(status => {
+      if (!status) {
+        next('failed to validate recaptcha');
+      }
+      next();
+    });
+  };
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
 });
-
-const recaptchaRequired = (req, res, next) => {
-  const recaptcha_token = req.body.recaptcha_token;
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
-  // Your code for recaptchaRequired middleware goes here
-  recaptcha.validate(recaptcha_token, ip)
-  .then(status => {
-    if (!status) {
-      next('failed to validate recaptcha');
-    }
-    next();
-  });
-};
-
-app.get('/main', (req, res) => {
-  return res.render('main');
-});
-
 
 app.get('/tx_hash/:code', limiter, (req, res) => {
   const code = req.params.code;
