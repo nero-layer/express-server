@@ -1,0 +1,21 @@
+{
+  "name": "eth-classic-faucet",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "better-sqlite3": "^9.0.0",
+    "dotenv": "^16.3.1",
+    "ethers": "5.6"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0"
+  }
+}
