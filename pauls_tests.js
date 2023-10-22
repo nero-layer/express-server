@@ -11,7 +11,7 @@ import sinon from 'sinon';
 
 import sqlite from 'better-sqlite3';
 
-const db_cursor = new sqlite.Database(':memory:');
+const db_cursor = new sqlite("./dev.db");
 
 describe('Test Paul\'s Functions', async function () {
   const db = new sqlite("./dev.db");
