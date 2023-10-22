@@ -1,8 +1,8 @@
 // Attached to 
 const secretKey = process.env.RECAPTCHA_SECRET;
-if (!secretKey) {
-  throw new Error(`RECAPTCHA_SECRET required`);
-}
+// if (!secretKey) {
+//   throw new Error(`RECAPTCHA_SECRET required`);
+// }
 
 export async function validate(token, ip) {
   const payload = {
@@ -10,6 +10,7 @@ export async function validate(token, ip) {
     response: token,
     remoteip: ip,
   };
+  const url = 'https://www.google.com/recaptcha/api/siteverify';
   return fetch(url, {
     method: 'POST',
     headers: {
